@@ -1,17 +1,26 @@
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const {Server} = require('socket.io')
-const io = new Server(server);
+const express = require('express')
+const app = express()
+const http = require('http').createServer(app)
 
-app.use('/', express.static(__dirname + '/public'));
+const PORT = process.env.PORT || 3000
+
+http.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`)
+})
+
+app.use(express.static(__dirname + '/public'))
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html')
+})
+
+// Socket 
+const io = require('socket.io')(http)
 
 io.on('connection', (socket) => {
-    socket.on('user-message', (message)=>{
-        socket.broadcast.emit('message', message);
+    console.log('Connected...')
+    socket.on('message', (msg) => {
+        socket.broadcast.emit('message', msg)
     })
-});
-server.listen(9000, ()=>{
-    console.log('server started');
+
 })
